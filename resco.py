@@ -1,60 +1,45 @@
 import streamlit as st
 import yfinance as yf
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
-st.set_page_config(page_title="Risk-O-Meter", layout="wide")
+st.title("Simple Resco Meter")
 
-st.title("Stock Risk-O-Meter")
-
-st.sidebar.header("Search Stock")
-ticker = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
+ticker = st.text_input("Enter Stock Symbol", "AAPL")
 
 if ticker:
-    data = yf.Ticker(ticker)
-    info = data.info
+    stock = yf.Ticker(ticker)
+    info = stock.info
 
     st.subheader(f"{info.get('shortName', ticker)} — {ticker}")
 
-    st.write("### Basic Info")
+    # Simple Risk Factors
+    beta = info.get("beta", 0)
+    pe = info.get("trailingPE", 0)
+    debt = info.get("debtToEquity", 0)
+    volatility = info.get("regularMarketDayHigh", 0) - info.get("regularMarketDayLow", 0)
+
+    st.write("### Basic Data")
     st.write({
         "Current Price": info.get("currentPrice"),
-        "Market Cap": info.get("marketCap"),
-        "P/E Ratio": info.get("trailingPE"),
-        "Dividend Yield": info.get("dividendYield"),
-        "52 Week High": info.get("fiftyTwoWeekHigh"),
-        "52 Week Low": info.get("fiftyTwoWeekLow")
+        "52W High": info.get("fiftyTwoWeekHigh"),
+        "52W Low": info.get("fiftyTwoWeekLow")
     })
 
-    st.write("### Risk Layers (Resco Meter)")
+    st.write("### Resco Meter (Simple Risk Levels)")
+    st.write(f"**Market Risk (Beta):** {beta}")
+    st.write(f"**Valuation Risk (P/E):** {pe}")
+    st.write(f"**Financial Risk (Debt/Equity):** {debt}")
+    st.write(f"**Volatility:** {volatility}")
 
-    layers = {
-        "1. Market Risk": info.get("beta"),
-        "2. Volatility": info.get("regularMarketDayHigh") - info.get("regularMarketDayLow"),
-        "3. Valuation Risk": info.get("trailingPE"),
-        "4. Financial Health": info.get("debtToEquity"),
-        "5. Liquidity Risk": info.get("currentRatio"),
-        "6. Profit Stability": info.get("profitMargins")
-    }
+    # Simple Risk conclusion
+    risk_score = 0
 
-    for name, value in layers.items():
-        st.write(f"{name}: {value}")
+    if beta and beta > 1:
+        risk_score += 2
+    if pe and pe > 25:
+        risk_score += 2
+    if debt and debt > 80:
+        risk_score += 2
+    if volatility and volatility > 5:
+        risk_score += 2
 
-
-# requirements.txt
-# streamlit
-yfinance
-pandas
-numpy
-scikit-learn
-plotly
-
-# README.md
-# Risk-O-Meter
-A Streamlit app that analyzes stock risk using six layers of financial indicators.
-
-## How to run
-```
-pip install -r requirements.txt
-streamlit run app.py
+    st.write("### Final Risk
