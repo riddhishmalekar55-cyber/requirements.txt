@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -41,6 +40,7 @@ if ticker:
 
     for name, value in layers.items():
         st.write(f"{name}: {value}")
+
 
 # requirements.txt
 # streamlit
